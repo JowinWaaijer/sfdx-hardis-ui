@@ -1,5 +1,15 @@
-import { BrowserWindow, app, ipcMain, nativeTheme, type IpcMainEvent } from "electron";
-import { join } from "path";
+import {ExecuteCommand} from "@common/CommandTypes";
+import {BrowserWindow, app, ipcMain, nativeTheme, type IpcMainEvent} from "electron";
+import {join} from "path";
+import * as os from 'os';
+import { WinShell } from "./WinShell";
+import {ContextBridgeApiParam} from "@common/ContextBridge";
+
+const isMac = os.platform() === "darwin";
+const isWindows = os.platform() === "win32";
+const isLinux = os.platform() === "linux";
+let shell = new WinShell();
+
 
 const createBrowserWindow = (): BrowserWindow => {
     const preloadScriptFilePath = join(__dirname, "..", "dist-preload", "index.js");
@@ -10,6 +20,7 @@ const createBrowserWindow = (): BrowserWindow => {
         vibrancy: "header",
         webPreferences: {
             preload: preloadScriptFilePath,
+            nodeIntegrationInWorker: true
         },
         icon: join(__dirname, "..", "build", "app-icon-dark.png"),
     });
@@ -27,6 +38,20 @@ const registerIpcEventListeners = () => {
     ipcMain.on("themeShouldUseDarkColors", (event: IpcMainEvent) => {
         event.returnValue = nativeTheme.shouldUseDarkColors;
     });
+
+    ipcMain.on("executeCommand", async (event: IpcMainEvent, args: ContextBridgeApiParam) => {
+        console.log(`Received execute command with args ${JSON.stringify(args)}`);
+
+        let cmd = args.obj as ExecuteCommand;
+        if(cmd.type === 'IS_INSTALLED') {
+            cmd.result = await shell.isInstalled(cmd);
+            cmd.state = "OK";
+            for (const browserWindow of BrowserWindow.getAllWindows()) {
+                browserWindow.webContents.send(args.uuid, cmd);
+            }
+        }
+
+    });
 };
 
 const registerNativeThemeEventListeners = (allBrowserWindows: BrowserWindow[]) => {
@@ -39,8 +64,9 @@ const registerNativeThemeEventListeners = (allBrowserWindows: BrowserWindow[]) =
 
 (async () => {
     await app.whenReady();
-    const mainWindow = createBrowserWindow();
-    loadFileOrUrl(mainWindow);
     registerIpcEventListeners();
     registerNativeThemeEventListeners(BrowserWindow.getAllWindows());
+    const mainWindow = createBrowserWindow();
+    loadFileOrUrl(mainWindow);
+    mainWindow.webContents.openDevTools();
 })();

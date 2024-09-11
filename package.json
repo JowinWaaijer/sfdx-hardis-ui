@@ -1,11 +1,11 @@
 {
-    "name": "electron-fluent-ui",
-    "description": "Template for developing Electron applications using TypeScript and Fluent UI React components",
+    "name": "hardis-ui",
+    "description": "",
     "version": "4.4.3",
     "license": "MIT",
     "author": {
-        "email": "oliver.schwendener@proton.me",
-        "name": "Oliver Schwendener",
+        "email": "jowin.waaijer@brightfox.nl",
+        "name": "Jowin.Waaijer",
         "url": "https://github.com/oliverschwendener"
     },
     "main": "dist-main/index.js",
