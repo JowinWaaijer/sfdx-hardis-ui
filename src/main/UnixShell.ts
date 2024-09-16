@@ -1,9 +1,9 @@
-import { ExecuteCommand } from "@common/CommandTypes";
-import * as child from "child_process";
-import * as util from "util";
 import { Shell } from "./Shell";
+import util from "util";
+import child from "child_process";
+import { ExecuteCommand } from "@common/CommandTypes";
 
-export class WinShell implements Shell {
+export class UnixShell implements Shell {
     exec = util.promisify(child.exec);
 
     changeDirectory(): Promise<Shell> {
@@ -21,7 +21,7 @@ export class WinShell implements Shell {
     async isInstalled(command: ExecuteCommand): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             try {
-                const { stdout, stderr } = await this.exec(command.command);
+                const { stdout, stderr } = await this.exec(`which ${command.command}`);
                 if (stdout == null || stderr) return resolve(false);
             } catch (e) {
                 console.log(e);

@@ -1,33 +1,31 @@
-
-import * as React from "react";
 import {
+    Button,
+    Drawer,
     DrawerBody,
     DrawerHeader,
     DrawerHeaderTitle,
-    Drawer,
     DrawerProps,
-    Button,
     Link,
     makeStyles,
     tokens,
+    typographyStyles,
 } from "@fluentui/react-components";
-import { Dismiss24Regular } from "@fluentui/react-icons";
-import {
-    createHashRouter,
-    RouterProvider,
-} from "react-router-dom"
-import {Home} from "../pages/Home";
-import {Installation} from "../pages/Installation";
+import { Dismiss24Regular, NavigationRegular } from "@fluentui/react-icons";
+import * as React from "react";
+import { createHashRouter, RouterProvider } from "react-router-dom";
+import { Home } from "../pages/Home";
+import { Installation } from "../pages/Installation";
 
 const useStyles = makeStyles({
     root: {
         border: "2px solid #ccc",
         overflow: "hidden",
         display: "flex",
+        flexGrow: 1,
         height: "100vh",
         backgroundColor: "#fff",
     },
-
+    title: typographyStyles.title3,
     content: {
         margin: `${tokens.spacingVerticalXL} ${tokens.spacingHorizontalXL}`,
         flex: "1",
@@ -41,14 +39,13 @@ type DrawerType = Required<DrawerProps>["type"];
 const router = createHashRouter([
     {
         path: "/",
-        element: <Home />
+        element: <Home />,
     },
     {
         path: "/installation",
-        element: <Installation />
-    }
+        element: <Installation />,
+    },
 ]);
-
 
 export const Navigation = () => {
     const styles = useStyles();
@@ -57,8 +54,10 @@ export const Navigation = () => {
     const [type, setType] = React.useState<DrawerType>("inline");
 
     const onMediaQueryChange = React.useCallback(
-        ({ matches }) => setType(matches ? "overlay" : "inline"),
-        [setType]
+        ({ matches }) => {
+            setType(matches ? "overlay" : "inline");
+        },
+        [setType],
     );
 
     React.useEffect(() => {
@@ -79,7 +78,7 @@ export const Navigation = () => {
                 open={isOpen}
                 onOpenChange={(_, { open }) => setIsOpen(open)}
             >
-                <DrawerHeader>
+                <DrawerHeader style={{backgroundColor: `${tokens.colorBrandBackground2}`}}>
                     <DrawerHeaderTitle
                         action={
                             <Button
@@ -90,7 +89,7 @@ export const Navigation = () => {
                             />
                         }
                     >
-                        Responsive Drawer
+                        Brightfox Deployer
                     </DrawerHeaderTitle>
                 </DrawerHeader>
 
@@ -100,12 +99,21 @@ export const Navigation = () => {
                 </DrawerBody>
             </Drawer>
 
-            <div className={styles.content}>
-                <Button appearance="primary" onClick={() => setIsOpen(!isOpen)}>
-                    Toggle
-                </Button>
-
-                <RouterProvider router={router}></RouterProvider>
+            <div style={{ display: "grid", gridTemplateColumns: "auto 1fr" }}>
+                <div style={{ display: "flex", flexGrow: 1, backgroundColor: `${tokens.colorBrandBackground2}`, alignContent: "stretch" }}>
+                    {!isOpen && (
+                        <NavigationRegular
+                            style={{
+                                fontSize: `${tokens.fontSizeHero800}`,
+                                padding: `${tokens.spacingVerticalXL} ${tokens.spacingHorizontalXL}`,
+                            }}
+                            onClick={() => setIsOpen(!isOpen)}
+                        />
+                    )}
+                </div>
+                <div style={{padding: `${tokens.spacingVerticalXL}`}}>
+                    <RouterProvider router={router}></RouterProvider>
+                </div>
             </div>
         </div>
     );

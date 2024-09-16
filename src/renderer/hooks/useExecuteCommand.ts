@@ -1,27 +1,25 @@
-import {useEffect, useState} from "react";
-import {CommandType, type ExecuteCommand} from "@common/CommandTypes";
-
+import { CommandType, type ExecuteCommand } from "@common/CommandTypes";
+import { ContextBridgeApiParam } from "@common/ContextBridge";
+import { useEffect, useState } from "react";
 
 const useExecuteCommand = (command: string, type: CommandType) => {
     const [executeCommand, setExecuteCommand] = useState({
         state: "PENDING",
         type: type,
         command: command,
-        uuid: crypto.randomUUID()
     });
 
     useEffect(() => {
-        window.ContextBridge.api.send("executeCommand", {uuid: executeCommand.uuid, obj: executeCommand});
-        window.ContextBridge.api.receive(executeCommand.uuid, (data: ExecuteCommand) => {
-           console.log('received');
-           console.log(data);
+        const uuid = crypto.randomUUID();
+        window.ContextBridge.api.send("executeCommand", { uuid: uuid, obj: executeCommand });
+        window.ContextBridge.api.receive(uuid, (data: ContextBridgeApiParam) => {
+            console.log("received");
+            console.log(JSON.stringify(data));
+            setExecuteCommand(data.obj as ExecuteCommand);
         });
-    }, [])
+    }, []);
 
-
-
-    return executeCommand
-}
-
+    return executeCommand;
+};
 
 export default useExecuteCommand;

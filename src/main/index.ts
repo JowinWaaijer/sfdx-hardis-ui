@@ -4,11 +4,12 @@ import {join} from "path";
 import * as os from 'os';
 import { WinShell } from "./WinShell";
 import {ContextBridgeApiParam} from "@common/ContextBridge";
+import { UnixShell } from "./UnixShell";
 
-const isMac = os.platform() === "darwin";
+//const isMac = os.platform() === "darwin";
 const isWindows = os.platform() === "win32";
-const isLinux = os.platform() === "linux";
-let shell = new WinShell();
+//const isLinux = os.platform() === "linux";
+const shell = isWindows ? new WinShell() : new UnixShell();
 
 
 const createBrowserWindow = (): BrowserWindow => {
@@ -42,12 +43,12 @@ const registerIpcEventListeners = () => {
     ipcMain.on("executeCommand", async (event: IpcMainEvent, args: ContextBridgeApiParam) => {
         console.log(`Received execute command with args ${JSON.stringify(args)}`);
 
-        let cmd = args.obj as ExecuteCommand;
+        const cmd = args.obj as ExecuteCommand;
         if(cmd.type === 'IS_INSTALLED') {
             cmd.result = await shell.isInstalled(cmd);
             cmd.state = "OK";
             for (const browserWindow of BrowserWindow.getAllWindows()) {
-                browserWindow.webContents.send(args.uuid, cmd);
+                browserWindow.webContents.send(args.uuid, {uuid: args.uuid, obj: cmd});
             }
         }
 
